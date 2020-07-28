@@ -6,7 +6,7 @@ gc.threshold(gc.mem_free() // 4 + gc.mem_alloc()) # sets threshold to 1/4 of hea
 
 
 HTTP__version__ = "1.0"
-__version__ = (0, 0, 1)
+__version__ = (0, 0, 2)
 
 
 class TimeoutError(Exception):
@@ -107,7 +107,7 @@ async def open_connection(host, port, ssl):
     return ss, ss
 
 
-async def _request_raw(method, url, headers, data):
+async def _request_raw(method, url, headers, data, json):
     try:
         proto, dummy, host, path = url.split("/", 3)
     except ValueError:
@@ -135,9 +135,13 @@ async def _request_raw(method, url, headers, data):
     query = "%s /%s HTTP/%s\r\nHost: %s\r\nConnection: close\r\n%s" % (method, path, HTTP__version__, host, headers)
     if "User-Agent:" not in query:
         query += "User-Agent: compat\r\n"
-    if data:
+    if json is not None:
+        assert data is None
+        import ujson
+        data = ujson.dumps(json)
         if "Content-Type:" not in query:
             query += "Content-Type: application/json\r\n"
+    if data:
         if "Content-Length:" not in query:
             query += "Content-Length: %d\r\n" % len(data)
     query += "\r\n"
@@ -147,7 +151,7 @@ async def _request_raw(method, url, headers, data):
     return reader
 
 
-async def _request(method, url, headers={}, data=None, params={}):
+async def _request(method, url, headers={}, data=None, params={}, json=None):
     try:
         #headers support
         h = ""
@@ -173,7 +177,7 @@ async def _request(method, url, headers={}, data=None, params={}):
         redir_cnt = 0
         redir_url = None
         while redir_cnt < 2:
-            reader = await _request_raw(method=method, url=url, headers=h, data=data)
+            reader = await _request_raw(method=method, url=url, headers=h, data=data, json=json)
             sline = await reader.readline()
             sline = sline.split(None, 2)
             status_code = int(sline[1])
@@ -215,6 +219,8 @@ async def _request(method, url, headers={}, data=None, params={}):
         return resp
     
     except Exception as e:
+        import sys
+        sys.print_exception(e)
         raise ConnectionError(e)
     finally:
         try:
@@ -224,37 +230,37 @@ async def _request(method, url, headers={}, data=None, params={}):
         gc.collect()
 
 
-async def get(url, headers={}, data=None, params={}, timeout=10):
+async def get(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("GET", url, headers, data, params), timeout)
+        return await asyncio.wait_for(_request("GET", url, headers, data, params, json), timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
     
 
-async def head(url, headers={}, data=None, params={}, timeout=10):
+async def head(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("HEAD", url, headers, data, params), timeout)
+        return await asyncio.wait_for(_request("HEAD", url, headers, data, params, json), timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
-async def post(url, headers={}, data=None, params={}, timeout=10):
+async def post(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("POST", url, headers, data, params), timeout)
+        return await asyncio.wait_for(_request("POST", url, headers, data, params, json), timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
-async def put(url, headers={}, data=None, params={}, timeout=10):
+async def put(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("PUT", url, headers, data, params), timeout)
+        return await asyncio.wait_for(_request("PUT", url, headers, data, params, json), timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
-async def delete(url, headers={}, data=None, params={}, timeout=10):
+async def delete(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("DELETE", url, headers, data, params), timeout)
+        return await asyncio.wait_for(_request("DELETE", url, headers, data, params, json), timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
@@ -263,21 +269,23 @@ async def delete(url, headers={}, data=None, params={}, timeout=10):
 class urequests:
  
     @staticmethod
-    def get(url, headers={}, data=None, params={}, timeout=10):
+    def get(url, json=None, data=None, headers={}, params={}, timeout=10):
         return asyncio.run(get(url, headers={}, data=None, params={}, timeout=timeout))
     
     @staticmethod
-    def head(url, headers={}, data=None, params={}, timeout=10):
+    def head(url, json=None, data=None, headers={}, params={}, timeout=10):
         return asyncio.run(head(url, headers={}, data=None, params={}, timeout=timeout))
 
     @staticmethod
-    def post(url, headers={}, data=None, params={}, timeout=10):
+    def post(url, json=None, data=None, headers={}, params={}, timeout=10):
         return asyncio.run(post(url, headers={}, data=None, params={}, timeout=timeout))
         
     @staticmethod
-    def put(url, headers={}, data=None, params={}, timeout=10):
+    def put(url, json=None, data=None, headers={}, params={}, timeout=10):
         return asyncio.run(put(url, headers={}, data=None, params={}, timeout=timeout))
 
     @staticmethod
-    def delete(url, headers={}, data=None, params={}, timeout=10):
+    def delete(url, json=None, data=None, headers={}, params={}, timeout=10):
         return asyncio.run(delete(url, headers={}, data=None, params={}, timeout=timeout))
+
+ 

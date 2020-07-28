@@ -215,8 +215,6 @@ async def _request(method, url, headers={}, data=None, params={}):
         return resp
     
     except Exception as e:
-        import sys
-        sys.print_exception(e)
         raise ConnectionError(e)
     finally:
         try:

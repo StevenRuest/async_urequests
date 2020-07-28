@@ -37,6 +37,11 @@ Notes:
   
 - supports timeout, default timeout set to 10 seconds.
 - Raises ConnectionError on any socket errors and TimeoutError on timeouts. To catch errors: requests.ConnectionError & requests.TimeoutError.
+- supports custom ports:
+
+  r = requests.get("https://192.168.1.100:1234")
+  
+  *tested with Plex Server
 
 Known Issues:
 - "memory allocation failed" occurs when reading large responses, will raise a ConnectionError.

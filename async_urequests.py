@@ -154,7 +154,9 @@ async def _request_raw(method, url, headers, data, json):
     return reader
 
 
-async def _request(method, url, headers={}, data=None, params={}, json=None):
+async def _requests(method, url, params={}, data=None, headers={}, cookies=None, \
+                    files=None, auth=None, timeout=None, allow_redirects=True, \
+                    proxies=None, hooks=None, stream=None, verify=None, cert=None, json=None):
     try:
         #headers support
         h = ""
@@ -208,6 +210,8 @@ async def _request(method, url, headers={}, data=None, params={}, json=None):
                         # get decoder
                         charset = line.rstrip().decode().split(None, 2)[-1].split("=")[-1]
             #look for redirects
+            if allow_redirects is False:
+                break
             if 301 <= status_code <= 303:
                 redir_cnt += 1
                 await reader.wait_closed()
@@ -231,60 +235,60 @@ async def _request(method, url, headers={}, data=None, params={}, json=None):
         gc.collect()
 
 
-async def get(url, json=None, data=None, headers={}, params={}, timeout=10):
+async def get(url, timeout=10, **kwargs):
     try:
-        return await asyncio.wait_for(_request("GET", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
+        return await asyncio.wait_for(_requests("GET", url, **kwargs), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
     
 
-async def head(url, json=None, data=None, headers={}, params={}, timeout=10):
+async def head(url, timeout=10, **kwargs):
     try:
-        return await asyncio.wait_for(_request("HEAD", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
+        return await asyncio.wait_for(_requests("HEAD", url, **kwargs), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
-async def post(url, json=None, data=None, headers={}, params={}, timeout=10):
+async def post(url, timeout=10, **kwargs):
     try:
-        return await asyncio.wait_for(_request("POST", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
+        return await asyncio.wait_for(_requests("POST", url, **kwargs), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
-async def put(url, json=None, data=None, headers={}, params={}, timeout=10):
+async def put(url, timeout=10, **kwargs):
     try:
-        return await asyncio.wait_for(_request("PUT", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
+        return await asyncio.wait_for(_requests("PUT", url, **kwargs), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
-async def delete(url, json=None, data=None, headers={}, params={}, timeout=10):
+async def delete(url, timeout=10, **kwargs):
     try:
-        return await asyncio.wait_for(_request("DELETE", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
+        return await asyncio.wait_for(_requests("DELETE", url, **kwargs), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
 # Makes it usable synchronously, but cannot use this class asynchronously because it was lockup the coro.
 class urequests:
- 
+
     @staticmethod
-    def get(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(get(url, headers=headers, data=data, params=params, timeout=timeout))
+    def get(url, **kwargs):
+        return asyncio.run(get(url, **kwargs))
     
     @staticmethod
-    def head(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(head(url, headers=headers, data=data, params=params, timeout=timeout))
+    def head(url, **kwargs):
+        return asyncio.run(head(url, **kwargs))
 
     @staticmethod
-    def post(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(post(url, headers=headers, data=data, params=params, timeout=timeout))
+    def post(url, **kwargs):
+        return asyncio.run(post(url, **kwargs))
         
     @staticmethod
-    def put(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(put(url, headers=headers, data=data, params=params, timeout=timeout))
+    def put(url, **kwargs):
+        return asyncio.run(put(url, **kwargs))
 
     @staticmethod
-    def delete(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(delete(url, headers=headers, data=data, params=params, timeout=timeout))
+    def delete(url, **kwargs):
+        return asyncio.run(delete(url, **kwargs))

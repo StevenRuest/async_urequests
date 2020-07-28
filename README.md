@@ -9,11 +9,11 @@ Requires uasyncio V3.
 Notes:
 - to import synchronously (normal) :
 
-  from uasync_urequests import urequests as requests
+  from async_urequests import urequests as requests
   
 - to import asynchronously: 
 
-  import uasync_urequests as requests
+  import async_urequests as requests
   
 - Default HTTP version is 1.0, to change HTTP version do: 
 

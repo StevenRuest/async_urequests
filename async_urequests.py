@@ -72,6 +72,9 @@ class Response:
         import ujson
         return ujson.loads(self.content)
     
+    def close(self):
+        pass
+    
     def __repr__(self):
         return "<Response [%d]>" % (self.status_code)
 
@@ -230,35 +233,35 @@ async def _request(method, url, headers={}, data=None, params={}, json=None):
 
 async def get(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("GET", url, headers, data, params, json), timeout)
+        return await asyncio.wait_for(_request("GET", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
     
 
 async def head(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("HEAD", url, headers, data, params, json), timeout)
+        return await asyncio.wait_for(_request("HEAD", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
 async def post(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("POST", url, headers, data, params, json), timeout)
+        return await asyncio.wait_for(_request("POST", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
 async def put(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("PUT", url, headers, data, params, json), timeout)
+        return await asyncio.wait_for(_request("PUT", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
 
 async def delete(url, json=None, data=None, headers={}, params={}, timeout=10):
     try:
-        return await asyncio.wait_for(_request("DELETE", url, headers, data, params, json), timeout)
+        return await asyncio.wait_for(_request("DELETE", url, headers=headers, data=data, params=params, json=json), timeout=timeout)
     except asyncio.TimeoutError as e:
         raise TimeoutError(e)
 
@@ -268,22 +271,20 @@ class urequests:
  
     @staticmethod
     def get(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(get(url, headers={}, data=None, params={}, timeout=timeout))
+        return asyncio.run(get(url, headers=headers, data=data, params=params, timeout=timeout))
     
     @staticmethod
     def head(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(head(url, headers={}, data=None, params={}, timeout=timeout))
+        return asyncio.run(head(url, headers=headers, data=data, params=params, timeout=timeout))
 
     @staticmethod
     def post(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(post(url, headers={}, data=None, params={}, timeout=timeout))
+        return asyncio.run(post(url, headers=headers, data=data, params=params, timeout=timeout))
         
     @staticmethod
     def put(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(put(url, headers={}, data=None, params={}, timeout=timeout))
+        return asyncio.run(put(url, headers=headers, data=data, params=params, timeout=timeout))
 
     @staticmethod
     def delete(url, json=None, data=None, headers={}, params={}, timeout=10):
-        return asyncio.run(delete(url, headers={}, data=None, params={}, timeout=timeout))
-
- 
+        return asyncio.run(delete(url, headers=headers, data=data, params=params, timeout=timeout))

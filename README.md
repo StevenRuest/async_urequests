@@ -20,7 +20,10 @@ Notes:
   requests.HTTP__version__ = "1.1"
   
 - supported HTTP methods: GET, HEAD, POST, PUT, DELETE.
-- Returns response with the following properties: content, status_code, reason, url, text, headers, encoder.
+- Returns response with the following properties: 
+
+  content, status_code, reason, url, text, headers, encoder.
+  
 - json from response by calling json() method:
 
   r.json()

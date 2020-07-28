@@ -1,6 +1,9 @@
 # async_urequests
+
 asynchronous urequests for micropython. optional urequests class to make usable synchronously.
+
 Tested on ESP32 only with esp32-idf3-20200725-unstable-v1.12-657-g37e1b5c89.bin
+
 Requires uasyncio V3.
 
 Notes:

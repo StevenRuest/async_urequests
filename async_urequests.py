@@ -124,6 +124,7 @@ async def _request_raw(method, url, headers, data, json):
             ssl = False
         else:
             raise ValueError("Unsupported protocol: %s" % (proto))
+        port = int(port)
     except ValueError:
         if proto == "http:":
             port = 80

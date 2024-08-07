@@ -103,8 +103,8 @@ async def open_connection(host, port, ssl):
             raise er
     yield core._io_queue.queue_write(s)
     if ssl:
-        import ussl
-        s = ussl.wrap_socket(s, server_hostname=host) # WARNING, this blocks for a long time
+        import ssl
+        s = ssl.wrap_socket(s, server_hostname=host) # WARNING, this blocks for a long time
     yield core._io_queue.queue_write(s)
     ss = Stream(s)
     return ss, ss
